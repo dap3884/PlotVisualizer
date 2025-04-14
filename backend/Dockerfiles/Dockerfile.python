@@ -1,0 +1,6 @@
+FROM python:3.10-slim
+
+RUN pip install matplotlib seaborn plotly numpy pandas
+
+WORKDIR /scripts
+CMD ["bash", "-c", "cd /output && python /scripts/script.py"]
