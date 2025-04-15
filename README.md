@@ -56,3 +56,16 @@
 3. How to render charts?
 * I had used static files concept of FastAPI in order to serve static files from our backend. This way I am easily able to return output figures to frontend.
 
+## Screenshots of platform
+
+<img src="images/image1.png" alt="image1">
+<img src="images/image2.png" alt="image2">
+<img src="images/image3.png" alt="image3">
+
+## Recording
+
+* Demo of this platform resides in `/demo` folder.
+
+## Contributor
+
+[Dev Patel](mailto::dap3@iu.edu)
