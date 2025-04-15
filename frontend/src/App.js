@@ -147,13 +147,13 @@ const App = () => {
               <p>Generating chart...</p>
             </div>
           ) : chartUrl && chartUrl.endsWith(".png") ? (
-            <img src={chartUrl} alt="Generated Chart" className="w-full border border-gray-700 rounded" />
+            <img src={chartUrl} alt="Generated Chart" className="w-full h-full border border-gray-700 rounded" />
           ) : chartUrl && chartUrl.endsWith(".html") ? (
             <iframe
               src={chartUrl}
               title="Visualization"
               width="100%"
-              height="500px"
+              height="900px"
               className="border border-gray-700 rounded"
             />
           ) : (
