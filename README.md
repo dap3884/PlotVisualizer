@@ -64,7 +64,7 @@
 
 ## Recording
 
-* Demo of this platform resides in `/demo` folder.
+* [Demo Link](https://drive.google.com/drive/folders/1ly6Yn5gZ2pgZ19PtSQs38WkaAsgRUV7S?usp=sharing)
 
 ## Contributor
 
