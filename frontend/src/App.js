@@ -9,7 +9,7 @@ const CodeEditor = ({ code, setCode, language }) => (
       language={language}
       value={code}
       onChange={(value) => setCode(value || "")}
-      theme="vs-dark"
+      theme="vs-light"
       options={{
         fontSize: 14,
         minimap: { enabled: false },
@@ -24,7 +24,6 @@ const CodeEditor = ({ code, setCode, language }) => (
 
 const App = () => {
   const [language, setLanguage] = useState("python");
-  const [visType, setVisType] = useState("static");
   const [code, setCode] = useState("");
   const [chartUrl, setChartUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,8 +49,6 @@ const App = () => {
       const response = await axios.post("http://localhost:8000/generate-visualization", {
         language,
         code,
-        output_type: visType === "static" ? "png" : "html",
-        visualization_type: visType,
       });
       console.log(response.data)
       setChartUrl("http://localhost:8000" + response.data.chart_url);
@@ -65,8 +62,8 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#121212] text-white font-sans">
       <header className="bg-[#1e1e1e] text-white p-4 shadow-md">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">PlotVisualizer</h1>
+        <div className="max-w-7xl mx-auto flex justify-center items-center">
+          <h1 className="text-2xl font-bold items-center">PlotVisualizer</h1>
         </div>
       </header>
 
@@ -76,20 +73,10 @@ const App = () => {
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="border border-gray-600 bg-[#252525] text-white p-2 rounded w-1/2"
+              className="border border-gray-600 bg-[#252525] text-white p-2 rounded w-1/2*2"
             >
               <option value="python">Python</option>
               <option value="r">R</option>
-            </select>
-
-            <select
-              value={visType}
-              onChange={(e) => setVisType(e.target.value)}
-              className="border border-gray-600 bg-[#252525] text-white p-2 rounded w-1/2"
-            >
-              <option value="static">Static</option>
-              <option value="interactive">Interactive</option>
-              <option value="3d">3D</option>
             </select>
           </div>
 
@@ -159,9 +146,9 @@ const App = () => {
               </svg>
               <p>Generating chart...</p>
             </div>
-          ) : chartUrl && visType === "static" ? (
+          ) : chartUrl && chartUrl.endsWith(".png") ? (
             <img src={chartUrl} alt="Generated Chart" className="w-full border border-gray-700 rounded" />
-          ) : chartUrl ? (
+          ) : chartUrl && chartUrl.endsWith(".html") ? (
             <iframe
               src={chartUrl}
               title="Visualization"
@@ -173,7 +160,6 @@ const App = () => {
             <p className="text-gray-400 text-center mt-10">Your visualization will appear here</p>
           )}
         </div>
-
       </div>
     </div>
   );

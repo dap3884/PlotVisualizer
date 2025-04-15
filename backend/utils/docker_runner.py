@@ -2,6 +2,7 @@ import shutil
 import os
 import subprocess
 import tempfile
+import uuid
 
 def sanitize_code(code: str, language: str):
     banned_keywords = {
@@ -14,7 +15,7 @@ def sanitize_code(code: str, language: str):
             raise ValueError(f"Use of '{keyword}' is not allowed in scripts.")
 
 
-def run_script_in_docker(code, language, output_path, output_type, visualization_type):
+def run_script_in_docker(code, language, output_path):
     with tempfile.TemporaryDirectory() as temp_dir:
         script_file = "script.py" if language == "python" else "script.R"
         script_path = os.path.join(temp_dir, script_file)
@@ -32,29 +33,38 @@ def run_script_in_docker(code, language, output_path, output_type, visualization
                 "docker", "run", "--rm",
                 "-v", f"{script_path}:/scripts/{script_file}",
                 "-v", f"{abs_output_dir}:/output",
-                "-e", f"OUTPUT_TYPE={output_type}",
-                "-e", f"VIS_TYPE={visualization_type}",
                 image
             ], check=True, timeout=15)
 
-            # Determine default filename
-            if output_type == "png":
-                expected_filename = "chart.png"
-            else:
-                expected_filename = "plot.html"
+            # Detect output file (assume only one file is generated)
+            files = os.listdir(abs_output_dir)
+            output_files = [f for f in files if f.endswith((".png", ".html"))]
 
-            src = os.path.join(abs_output_dir, expected_filename)
+            if not output_files:
+                raise FileNotFoundError("No output .png or .html file found in /output")
 
-            # Move to final filename (UUID-based)
-            shutil.move(src, output_path)
+            detected_file = output_files[0]
+            src = os.path.join(abs_output_dir, detected_file)
 
-            # Clean up all other files
-            for filename in os.listdir(abs_output_dir):
-                full_path = os.path.join(abs_output_dir, filename)
-                if full_path != output_path and os.path.isfile(full_path):
-                    os.remove(full_path)
+            # Use same extension in final filename
+            ext = os.path.splitext(detected_file)[-1]
+            final_output = f"{uuid.uuid4()}{ext}"
+            final_path = os.path.join(abs_output_dir, final_output)
 
+            shutil.move(src, final_path)
+
+            # Clean up any stray files
+            for f in files:
+                stray = os.path.join(abs_output_dir, f)
+                if stray != final_path and os.path.isfile(stray):
+                    os.remove(stray)
+
+            return final_output  # Return filename for API response
+
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("Script execution timed out.")
         except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Execution failed: {e.stderr or e}")
+            raise RuntimeError(f"Execution failed: {e.stderr or str(e)}")
         except FileNotFoundError as e:
             raise RuntimeError(f"Expected output file not found: {e}")
+
